@@ -1,0 +1,122 @@
+[
+  {
+    "ContainingType": "worldChat.Controllers.RedisController",
+    "Method": "AdicionarUsuarioOnline",
+    "RelativePath": "api/Redis/adicionar-usuario-online/{userId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "worldChat.Controllers.RedisController",
+    "Method": "ObterContadorMensagens",
+    "RelativePath": "api/Redis/contador-mensagens/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "worldChat.Controllers.RedisController",
+    "Method": "RemoverTodosUsuariosOnline",
+    "RelativePath": "api/Redis/deletar-usuarios",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "worldChat.Controllers.RedisController",
+    "Method": "RemoverUsuarioOnline",
+    "RelativePath": "api/Redis/remover-usuario-online/{userId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "worldChat.Controllers.RedisController",
+    "Method": "ListarUsuariosOnline",
+    "RelativePath": "api/Redis/usuarios-online",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "worldChat.Controllers.UsuariosController",
+    "Method": "GetUsuarioByCredentialsAsync",
+    "RelativePath": "api/Usuarios/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioLoginRequest",
+        "Type": "worldChat.Dtos.UsuarioLoginRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "worldChat.Models.ServiceResponse\u00601[[worldChat.Dtos.UsuarioLoginRequest, worldChat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "worldChat.Controllers.UsuariosController",
+    "Method": "CreateUsuarioAsync",
+    "RelativePath": "api/Usuarios/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuario",
+        "Type": "worldChat.Models.UsuarioModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "worldChat.Models.ServiceResponse\u00601[[worldChat.Models.UsuarioModel, worldChat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  }
+]
