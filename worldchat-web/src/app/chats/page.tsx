@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import createSignalRConnection from "@/lib/SignalrConnection";
 import { HubConnection } from "@microsoft/signalr";
+import desconectarUsuario from "@/api/apiCalls";
 import endpoints from "@/api/apiRoutes";
 import styles from "./page.module.css";
 
@@ -15,12 +16,15 @@ type ChatMessage = {
 export default function Chats() {
   const router = useRouter();
 
+  const username = localStorage.getItem("username");
+  const token = localStorage.getItem("username");
+
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [inputText, setInputText] = useState<string>("");
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
   const [usuariosConnectados, setUsuariosConnectados] = useState<string[]>([]);
 
-  async function handleFetchUsuarios(): Promise<string[]> {
+  async function handleListarUsuariosOnline(): Promise<string[]> {
     try {
       const response = await fetch(endpoints.listarUsuarios, {
         method: "GET",
@@ -44,6 +48,12 @@ export default function Chats() {
   }
 
   useEffect(() => {
+    if (!username || !token) {
+      router.push("/login");
+    }
+  }, [username, token, router]);
+
+  useEffect(() => {
     const token: string = localStorage.getItem("token") || "";
 
     const newConnection = createSignalRConnection(
@@ -53,9 +63,6 @@ export default function Chats() {
       },
       (username: string) => {
         setUsuariosConnectados((prev) => [...prev, username]);
-      },
-      (username: string) => {
-        setUsuariosConnectados((prev) => prev.filter((u) => u !== username));
       },
       (connectionId: string) => {
         console.log("Minha connectionId:", connectionId);
@@ -73,7 +80,7 @@ export default function Chats() {
 
   useEffect(() => {
     async function fetchUsuarios() {
-      const usuarios = await handleFetchUsuarios();
+      const usuarios = await handleListarUsuariosOnline();
       setUsuariosConnectados(usuarios);
     }
 
@@ -92,22 +99,9 @@ export default function Chats() {
     }
   };
 
-  async function handleDesconectarUsuario(username: string) {
-    try {
-      await fetch(endpoints.removerUsuario(username), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (error) {
-      console.error("Erro ao desconectar usuário:", error);
-    }
-  }
-
   async function handleSair() {
     connection?.stop();
-    await handleDesconectarUsuario(username);
+    desconectarUsuario(username || "");
     router.push("/login");
   }
 

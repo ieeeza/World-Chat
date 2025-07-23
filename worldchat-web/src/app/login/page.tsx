@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import endpoints from "@/api/apiRoutes";
+import { buscarCredencial } from "@/api/apiCalls";
+import { StyleState } from "@/types/useStateType";
+import { LoginResponse } from "@/types/apiType";
 import styles from "./page.module.css";
 
-type serverResponse = {
-  dados: string;
-  mensagem: string;
-  sucesso: boolean;
-  horaResposta: string;
-};
+
 
 export default function Login() {
   const router = useRouter();
@@ -19,33 +16,13 @@ export default function Login() {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  const [style, setStyle] = useState({
+  const [style, setStyle] = useState<StyleState>({
     isLoading: false,
     errorUsername: false,
     errorPassword: false,
   });
 
-  async function fetchLogin() {
-    try {
-      return await fetch(endpoints.login, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      setError("Erro ao conectar ao servidor. Tente novamente mais tarde.");
-      setStyle({ ...style, isLoading: false });
-      return { status: 500, json: () => ({ mensagem: "Erro de conexão" }) };
-    }
-  }
-
-  async function handleInputs() {
+  async function handleInputs(): Promise<void> {
     if (!username || username.trim() === "") {
       setError("Por favor, preencha o campo nome de usuário.");
       setStyle({ ...style, errorUsername: true });
@@ -58,8 +35,10 @@ export default function Login() {
     setError("");
   }
 
-  async function validateStatusResponse(jwtToken: serverResponse) {
-    if (jwtToken.mensagem == "Usuário não encontrado.") {
+  async function validateStatusResponse(
+    response: LoginResponse
+  ): Promise<boolean> {
+    if (response.mensagem == "Usuário não encontrado.") {
       setStyle({
         ...style,
         errorUsername: true,
@@ -74,18 +53,15 @@ export default function Login() {
     return true;
   }
 
-  async function handleLogin() {
+  async function handleLogin(): Promise<void> {
     setStyle({ ...style, isLoading: true });
-
+    
     await handleInputs();
 
-    const response = await fetchLogin();
-
     try {
-      const jwtToken = await response.json();
-      localStorage.setItem("token", jwtToken.dados.password);
+      const response = await buscarCredencial(username, password);
 
-      const isValid = await validateStatusResponse(jwtToken);
+      const isValid = await validateStatusResponse(response);
       if (!isValid) return;
 
       setStyle({ ...style, isLoading: false });
