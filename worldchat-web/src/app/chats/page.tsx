@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import createSignalRConnection from "@/lib/SignalrConnection";
 import { HubConnection } from "@microsoft/signalr";
-import desconectarUsuario from "@/api/apiCalls";
+import { desconectarUsuario } from "@/api/apiCalls";
 import endpoints from "@/api/apiRoutes";
 import styles from "./page.module.css";
 
@@ -23,6 +23,49 @@ export default function Chats() {
   const [inputText, setInputText] = useState<string>("");
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
   const [usuariosConnectados, setUsuariosConnectados] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!username || !token) {
+      router.push("/login");
+    }
+  }, [username, token, router]);
+
+  useEffect(() => {
+    const token: string = localStorage.getItem("token") || "";
+
+    const newConnection = createSignalRConnection(
+      token,
+      (user: string, message: string) => {
+        setChatLog((prev) => [...prev, { sender: user, text: message }]);
+      },
+      (username: string) => {
+        setUsuariosConnectados((prev) => [...prev, username]);
+      },
+      (username: string) => {
+        removeUserFromList(username);
+      },
+      (connectionId: string) => {
+        alert(`Você está conectado com o ID: ${connectionId}`);
+      }
+    );
+
+    newConnection.start().then(() => {
+      setConnection(newConnection);
+    });
+
+    return () => {
+      newConnection.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    async function fetchUsuarios() {
+      const usuarios = await handleListarUsuariosOnline();
+      setUsuariosConnectados(usuarios);
+    }
+
+    fetchUsuarios();
+  }, []);
 
   async function handleListarUsuariosOnline(): Promise<string[]> {
     try {
@@ -47,47 +90,7 @@ export default function Chats() {
     }
   }
 
-  useEffect(() => {
-    if (!username || !token) {
-      router.push("/login");
-    }
-  }, [username, token, router]);
-
-  useEffect(() => {
-    const token: string = localStorage.getItem("token") || "";
-
-    const newConnection = createSignalRConnection(
-      token,
-      (user: string, message: string) => {
-        setChatLog((prev) => [...prev, { sender: user, text: message }]);
-      },
-      (username: string) => {
-        setUsuariosConnectados((prev) => [...prev, username]);
-      },
-      (connectionId: string) => {
-        console.log("Minha connectionId:", connectionId);
-      }
-    );
-
-    newConnection.start().then(() => {
-      setConnection(newConnection);
-    });
-
-    return () => {
-      newConnection.stop();
-    };
-  }, []);
-
-  useEffect(() => {
-    async function fetchUsuarios() {
-      const usuarios = await handleListarUsuariosOnline();
-      setUsuariosConnectados(usuarios);
-    }
-
-    fetchUsuarios();
-  }, []);
-
-  const handleSendMessage = async () => {
+  async function handleSendMessage(): Promise<void> {
     if (connection && inputText.trim() !== "") {
       try {
         await connection.invoke("SendMessage", inputText);
@@ -103,6 +106,10 @@ export default function Chats() {
     connection?.stop();
     desconectarUsuario(username || "");
     router.push("/login");
+  }
+
+  function removeUserFromList(user: string) {
+    setUsuariosConnectados((prev) => prev.filter((u) => u !== user));
   }
 
   return (

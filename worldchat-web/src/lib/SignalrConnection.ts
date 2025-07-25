@@ -5,6 +5,7 @@ export default function createSignalRConnection(
   token: string,
   onReceiveMessage: (user: string, message: string) => void,
   onUserConnected: (user: string) => void,
+  onUserDisconnected: (user: string) => void,
   onReceivedConnectionId: (connectionId: string) => void
 ) {
   const username = localStorage.getItem("username");
@@ -19,6 +20,7 @@ export default function createSignalRConnection(
 
   connection.on("ReceiveMessage", onReceiveMessage);
   connection.on("UserConnected", onUserConnected);
+  connection.on("UserDisconnected", onUserDisconnected);
   connection.on("ReceivedConnectionId", onReceivedConnectionId);
 
   connection.onclose(async () => {

@@ -7,8 +7,6 @@ import { StyleState } from "@/types/useStateType";
 import { LoginResponse } from "@/types/apiType";
 import styles from "./page.module.css";
 
-
-
 export default function Login() {
   const router = useRouter();
 
@@ -63,6 +61,9 @@ export default function Login() {
 
       const isValid = await validateStatusResponse(response);
       if (!isValid) return;
+
+      localStorage.setItem("username", response.username);
+      localStorage.setItem("token", response.password);
 
       setStyle({ ...style, isLoading: false });
       setError("");

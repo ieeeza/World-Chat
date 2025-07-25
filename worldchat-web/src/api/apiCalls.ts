@@ -1,10 +1,5 @@
 import endpoints from "@/api/apiRoutes";
-
-type responseLogin = {
-  username: string;
-  password: string;
-  mensagem: string;
-}
+import { LoginResponse } from "@/types/apiType";
 
 export async function desconectarUsuario(username: string): Promise<void> {
   await fetch(endpoints.removerUsuario(username), {
@@ -22,7 +17,7 @@ export async function desconectarUsuario(username: string): Promise<void> {
 export async function buscarCredencial(
   username: string,
   password: string
-): Promise<responseLogin> {
+): Promise<LoginResponse> {
   const response = await fetch(endpoints.login, {
     method: "POST",
     headers: {

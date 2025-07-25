@@ -5,9 +5,10 @@ using worldChat.Service.RedisServices;
 namespace worldChat.Hubs
 {
     [Authorize]
-    public class ChatHub(RedisChatService redisChatService) : Hub
+    public class ChatHub(RedisChatService redisChatService, ILogger<ChatHub> logger) : Hub
     {
         private readonly RedisChatService _redisChatService = redisChatService;
+        private readonly ILogger<ChatHub> _logger = logger;
 
         public async Task OnSendMessage(string message)
         {
@@ -15,7 +16,8 @@ namespace worldChat.Hubs
 
             if (string.IsNullOrEmpty(username))
             {
-                throw new InvalidOperationException("Não foi possível obter o nome do usuário autenticado para a conexão SignalR.");
+                _logger.LogWarning("Não foi possível obter o nome do usuário autenticado para a conexão SignalR.");
+                return;
             }
 
             await _redisChatService.IncrementarContadorMensagem(username);
@@ -28,7 +30,8 @@ namespace worldChat.Hubs
 
             if (string.IsNullOrEmpty(username))
             {
-                throw new InvalidOperationException("Não foi possível obter o nome do usuário autenticado para a conexão SignalR.");
+                _logger.LogWarning("Conexão de usuário sem nome de usuário associado.");
+                return;
             }
 
             var connectionId = Context.ConnectionId;
@@ -45,13 +48,22 @@ namespace worldChat.Hubs
 
             if (string.IsNullOrEmpty(username))
             {
-                throw new InvalidOperationException("Não foi possível obter o nome do usuário autenticado para a conexão SignalR.");
+                _logger.LogWarning("Desconexão de usuário sem nome de usuário associado.");
+                return;
             }
 
-            await _redisChatService.RemoverUsuarioOnline(username);
+            try
+            {
+                await _redisChatService.RemoverUsuarioOnline(username);
+                await Clients.All.SendAsync("UserDisconnected", username);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao remover usuário online.");
+            }
 
-            await Clients.All.SendAsync("UserDisconnected", username);
             await base.OnDisconnectedAsync(exception);
         }
+
     }
 }
