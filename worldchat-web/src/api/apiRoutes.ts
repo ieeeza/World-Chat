@@ -1,4 +1,4 @@
-const url = "https://localhost:7071/api";
+const url = "https://worldchat-backend-uh8y.onrender.com";
 
 const endpoints = {
   "login": `${url}/Usuarios/login`,
