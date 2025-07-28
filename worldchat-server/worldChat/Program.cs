@@ -16,24 +16,25 @@ if (JwtSettings == null || string.IsNullOrEmpty(JwtSettings.SecretKey))
     throw new InvalidOperationException("JwtSettings or SecretKey is not configured properly.");
 }
 
-var redisConnectionString = builder.Configuration.GetConnectionString("RedisConnection");
+builder.Services.AddJwtAuthentication(JwtSettings.SecretKey);
+
+var redisConnectionString = Environment.GetEnvironmentVariable("redisConnectionString");
 
 if (string.IsNullOrEmpty(redisConnectionString))
 {
     throw new InvalidOperationException("Redis connection string is not configured properly.");
 }
 
-builder.Services.AddJwtAuthentication(JwtSettings.SecretKey);
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var configuration = ConfigurationOptions.Parse(redisConnectionString, true);
     return ConnectionMultiplexer.Connect(configuration);
+});
+
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
 });
 
 builder.Services.AddCors(options =>

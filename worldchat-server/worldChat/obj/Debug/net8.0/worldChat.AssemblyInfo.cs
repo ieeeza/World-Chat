@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("worldChat")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f8da2d97276af36b587e26a91507c53cbdd8a0e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af6d23fbbbcd6d8e6b487f2a7d4ab155c8ecf233")]
 [assembly: System.Reflection.AssemblyProductAttribute("worldChat")]
 [assembly: System.Reflection.AssemblyTitleAttribute("worldChat")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ieza\\Desktop\\Projetos\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj": {}
+    "C:\\Users\\ieza\\Desktop\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ieza\\Desktop\\Projetos\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj": {
+    "C:\\Users\\ieza\\Desktop\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ieza\\Desktop\\Projetos\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj",
+        "projectUniqueName": "C:\\Users\\ieza\\Desktop\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj",
         "projectName": "worldChat",
-        "projectPath": "C:\\Users\\ieza\\Desktop\\Projetos\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj",
+        "projectPath": "C:\\Users\\ieza\\Desktop\\World-Chat\\worldchat-server\\worldChat\\worldChat.csproj",
         "packagesPath": "C:\\Users\\ieza\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ieza\\Desktop\\Projetos\\World-Chat\\worldchat-server\\worldChat\\obj\\",
+        "outputPath": "C:\\Users\\ieza\\Desktop\\World-Chat\\worldchat-server\\worldChat\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
