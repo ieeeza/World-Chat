@@ -1,4 +1,4 @@
-const url = "https://worldchat-backend-latest.onrender.com";
+const url = "https://worldchat-backend-latest.onrender.com/api";
 
 const endpoints = {
   "login": `${url}/Usuarios/login`,

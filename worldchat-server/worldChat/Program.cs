@@ -25,12 +25,14 @@ if (string.IsNullOrEmpty(redisConnectionString))
     throw new InvalidOperationException("Redis connection string is not configured properly.");
 }
 
+//var redis = builder.Configuration.GetConnectionString("redis");
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var configuration = ConfigurationOptions.Parse(redisConnectionString, true);
     return ConnectionMultiplexer.Connect(configuration);
 });
 
+//var conec = builder.Configuration.GetConnectionString("DefaultConnection");
 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -41,7 +43,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:3000", "https://localhost:3000")
+        builder.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://world-chat-4fb6.vercel.app")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
