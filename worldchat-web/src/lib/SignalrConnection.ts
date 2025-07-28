@@ -11,7 +11,7 @@ export default function createSignalRConnection(
   const username = localStorage.getItem("username");
 
   const connection = new signalR.HubConnectionBuilder()
-    .withUrl("https://localhost:7071/chats", {
+    .withUrl("https://worldchat-backend-latest.onrender.com/chats", {
       accessTokenFactory: () => token,
     })
     .withAutomaticReconnect()
