@@ -56,7 +56,7 @@ export default function Chats() {
     return () => {
       newConnection.stop();
     };
-  }, []);
+  }, [username]);
 
   useEffect(() => {
     async function fetchUsuarios() {
@@ -140,9 +140,9 @@ export default function Chats() {
           <div className={styles.middleBar}>
             <p className={styles.middleBarTittle}>Chat Messages</p>
             <div className={styles.chatMessages}>
-              {chatLog.map((msg, idx) => (
+              {chatLog.map((msg, messageId) => (
                 <div
-                  key={idx}
+                  key={messageId++}
                   className={
                     msg.isMine
                       ? styles.chatMessagesSenderContainer
@@ -179,7 +179,7 @@ export default function Chats() {
             <p className={styles.rightBarTitle}>Online Users</p>
             <div className={styles.onlineUsers}>
               {usuariosConnectados.map((usuario) => (
-                <p className={styles.onlineUser}>{usuario}</p>
+                <p key={usuario} className={styles.onlineUser}>{usuario}</p>
               ))}
             </div>
           </div>
