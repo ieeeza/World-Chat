@@ -12,8 +12,8 @@ import styles from "./page.module.css";
 export default function Chats() {
   const router = useRouter();
 
-  const username = localStorage.getItem("username");
-  const token = localStorage.getItem("username");
+  const username = localStorage.getItem("username") || "";
+  const token = localStorage.getItem("username") || "";
 
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [inputText, setInputText] = useState<string>("");
