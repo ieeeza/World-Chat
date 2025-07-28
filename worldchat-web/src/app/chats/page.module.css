@@ -97,14 +97,22 @@
   border-bottom: 1px solid #fff;
 }
 
-.chatMessagesReceived {
-  color: #00ff00;
-  margin: 5px 0;
+.chatMessagesReceivedContainer {
+  display: flex;  
+  gap: 5px;
 }
 
-.chatMessagesSender {
+.chatMessagesReceivedUser {
+  color: #09ff00;
+}
+
+.chatMessagesSenderContainer {
   display: flex;
   justify-content: flex-end;
+
+}
+
+.chatMessagesSenderContainer p {
   color: #00bfff;
 }
 

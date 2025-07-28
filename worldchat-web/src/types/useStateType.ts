@@ -3,3 +3,9 @@ export interface StyleState {
   errorUsername: boolean;
   errorPassword: boolean;
 }
+
+export interface ChatMessage { 
+  sender: string;
+  text: string;
+  isMine: boolean;
+}

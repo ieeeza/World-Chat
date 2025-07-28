@@ -10,7 +10,7 @@ namespace worldChat.Hubs
         private readonly RedisChatService _redisChatService = redisChatService;
         private readonly ILogger<ChatHub> _logger = logger;
 
-        public async Task OnSendMessage(string message)
+        public async Task SendMessage(string message)
         {
             var username = Context.User?.Identity?.Name ?? "";
 

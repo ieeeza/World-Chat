@@ -5,13 +5,9 @@ import { useRouter } from "next/navigation";
 import createSignalRConnection from "@/lib/SignalrConnection";
 import { HubConnection } from "@microsoft/signalr";
 import { desconectarUsuario } from "@/api/apiCalls";
+import { ChatMessage } from "@/types/useStateType";
 import endpoints from "@/api/apiRoutes";
 import styles from "./page.module.css";
-
-type ChatMessage = {
-  sender: string;
-  text: string;
-};
 
 export default function Chats() {
   const router = useRouter();
@@ -36,7 +32,11 @@ export default function Chats() {
     const newConnection = createSignalRConnection(
       token,
       (user: string, message: string) => {
-        setChatLog((prev) => [...prev, { sender: user, text: message }]);
+        const isMyMessage = user === username;
+        setChatLog((prev) => [
+          ...prev,
+          { sender: user, text: message, isMine: isMyMessage },
+        ]);
       },
       (username: string) => {
         setUsuariosConnectados((prev) => [...prev, username]);
@@ -100,7 +100,7 @@ export default function Chats() {
         console.error("Erro ao enviar mensagem:", err);
       }
     }
-  };
+  }
 
   async function handleSair() {
     connection?.stop();
@@ -140,10 +140,22 @@ export default function Chats() {
           <div className={styles.middleBar}>
             <p className={styles.middleBarTittle}>Chat Messages</p>
             <div className={styles.chatMessages}>
-              {chatLog.map((message, index) => (
-                <p key={index} className={styles.chatMessagesReceived}>
-                  {message.sender}: {message.text}
-                </p>
+              {chatLog.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={
+                    msg.isMine
+                      ? styles.chatMessagesSenderContainer
+                      : styles.chatMessagesReceivedContainer
+                  }
+                >
+                  {!msg.isMine && (
+                    <p className={styles.chatMessagesReceivedUser}>
+                      {msg.sender}:
+                    </p>
+                  )}
+                  <p>{msg.text}</p>
+                </div>
               ))}
             </div>
             <div className={styles.textInputContainer}>

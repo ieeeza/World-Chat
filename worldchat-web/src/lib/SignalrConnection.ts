@@ -3,7 +3,7 @@ import * as signalR from "@microsoft/signalr";
 
 export default function createSignalRConnection(
   token: string,
-  onReceiveMessage: (user: string, message: string) => void,
+  onReceiveMessage: (user: string, message: string, isMine: boolean) => void,
   onUserConnected: (user: string) => void,
   onUserDisconnected: (user: string) => void,
   onReceivedConnectionId: (connectionId: string) => void

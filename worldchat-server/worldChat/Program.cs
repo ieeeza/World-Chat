@@ -70,6 +70,9 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
+app.Urls.Add($"http://*:{port}");
+
 app.MapControllers();
 app.MapHub<ChatHub>("/chats")
     .RequireAuthorization();
