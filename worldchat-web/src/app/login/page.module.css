@@ -55,7 +55,7 @@
   border-color: #ff0000;
 }
 
-input:focus {
+.input:focus {
   outline: none;
   border: 1px solid #fff;
 }
