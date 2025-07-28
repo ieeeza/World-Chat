@@ -12,22 +12,18 @@ import styles from "./page.module.css";
 export default function Chats() {
   const router = useRouter();
 
-  const username = localStorage.getItem("username") || "";
-  const token = localStorage.getItem("username") || "";
-
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [inputText, setInputText] = useState<string>("");
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
   const [usuariosConnectados, setUsuariosConnectados] = useState<string[]>([]);
 
   useEffect(() => {
+    const username: string = localStorage.getItem("username") || "";
+    const token: string = localStorage.getItem("token") || "";
+
     if (!username || !token) {
       router.push("/login");
     }
-  }, [username, token, router]);
-
-  useEffect(() => {
-    const token: string = localStorage.getItem("token") || "";
 
     const newConnection = createSignalRConnection(
       token,
@@ -56,7 +52,7 @@ export default function Chats() {
     return () => {
       newConnection.stop();
     };
-  }, [username]);
+  }, [router]);
 
   useEffect(() => {
     async function fetchUsuarios() {
@@ -104,7 +100,7 @@ export default function Chats() {
 
   async function handleSair() {
     connection?.stop();
-    desconectarUsuario(username || "");
+    desconectarUsuario(localStorage.getItem("username") || "");
     router.push("/login");
   }
 
