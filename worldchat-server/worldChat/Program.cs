@@ -18,25 +18,25 @@ if (JwtSettings == null || string.IsNullOrEmpty(JwtSettings.SecretKey))
 
 builder.Services.AddJwtAuthentication(JwtSettings.SecretKey);
 
-var redisConnectionString = Environment.GetEnvironmentVariable("redisConnectionString");
+//var redisConnectionString = Environment.GetEnvironmentVariable("redisConnectionString");
 
-if (string.IsNullOrEmpty(redisConnectionString))
-{
-    throw new InvalidOperationException("Redis connection string is not configured properly.");
-}
+//if (string.IsNullOrEmpty(redisConnectionString))
+//{
+//    throw new InvalidOperationException("Redis connection string is not configured properly.");
+//}
 
-//var redis = builder.Configuration.GetConnectionString("redis");
+var redis = builder.Configuration.GetConnectionString("redis");
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var configuration = ConfigurationOptions.Parse(redisConnectionString, true);
+    var configuration = ConfigurationOptions.Parse(redis, true);
     return ConnectionMultiplexer.Connect(configuration);
 });
 
-//var conec = builder.Configuration.GetConnectionString("DefaultConnection");
-var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+var conec = builder.Configuration.GetConnectionString("DefaultConnection");
+//var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(connectionString);
+    options.UseNpgsql(conec);
 });
 
 builder.Services.AddCors(options =>
@@ -74,8 +74,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
-app.Urls.Add($"http://*:{port}");
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
+//app.Urls.Add($"http://*:{port}");
 
 app.MapControllers();
 app.MapHub<ChatHub>("/chats")

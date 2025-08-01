@@ -9,3 +9,9 @@ export interface ChatMessage {
   text: string;
   isMine: boolean;
 }
+
+export interface Usuario { 
+  connectionId: string;
+  username: string;
+  mensages: number;
+}

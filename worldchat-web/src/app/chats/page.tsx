@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import createSignalRConnection from "@/lib/SignalrConnection";
 import { HubConnection } from "@microsoft/signalr";
 import { desconectarUsuario } from "@/api/apiCalls";
-import { ChatMessage } from "@/types/useStateType";
+import { ChatMessage, Usuario } from "@/types/useStateType";
 import endpoints from "@/api/apiRoutes";
 import styles from "./page.module.css";
 
@@ -15,16 +15,17 @@ export default function Chats() {
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [inputText, setInputText] = useState<string>("");
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
-  const [usuariosConnectados, setUsuariosConnectados] = useState<string[]>([]);
+  const [usuariosConnectados, setUsuariosConnectados] = useState<Usuario[]>([]);
+  const [connectionId, setConnectionId] = useState<string>("");
+
+  const username: string = localStorage.getItem("username") || "";
+  const token: string = localStorage.getItem("token") || "";
+
+  if (!username || !token) {
+    router.push("/login");
+  }
 
   useEffect(() => {
-    const username: string = localStorage.getItem("username") || "";
-    const token: string = localStorage.getItem("token") || "";
-
-    if (!username || !token) {
-      router.push("/login");
-    }
-
     const newConnection = createSignalRConnection(
       token,
       (user: string, message: string) => {
@@ -35,13 +36,20 @@ export default function Chats() {
         ]);
       },
       (username: string) => {
-        setUsuariosConnectados((prev) => [...prev, username]);
+        const novoUsuario: Usuario = {
+          connectionId: connectionId,
+          username,
+          mensages: 0,
+        };
+
+        setUsuariosConnectados((prev) => [...prev, novoUsuario]);
       },
       (username: string) => {
         removeUserFromList(username);
       },
       (connectionId: string) => {
-        alert(`Você está conectado com o ID: ${connectionId}`);
+        setConnectionId(connectionId);
+        console.log("Connection ID received:", connectionId);
       }
     );
 
@@ -52,16 +60,27 @@ export default function Chats() {
     return () => {
       newConnection.stop();
     };
-  }, [router]);
+  }, [connectionId, router, token, username]);
 
   useEffect(() => {
     async function fetchUsuarios() {
       const usuarios = await handleListarUsuariosOnline();
-      setUsuariosConnectados(usuarios);
+
+      setUsuariosConnectados((prev) => {
+        const novosUsuarios = usuarios
+          .filter((username) => !prev.some((u) => u.username === username))
+          .map((username) => ({
+            connectionId: connectionId,
+            username,
+            mensages: 0,
+          }));
+
+        return [...prev, ...novosUsuarios];
+      });
     }
 
     fetchUsuarios();
-  }, []);
+  }, [connectionId]);
 
   async function handleListarUsuariosOnline(): Promise<string[]> {
     try {
@@ -77,7 +96,6 @@ export default function Chats() {
       }
 
       const usuarios: string[] = await response.json();
-      console.log("Usuários conectados:", usuarios);
 
       return usuarios;
     } catch (error) {
@@ -86,10 +104,25 @@ export default function Chats() {
     }
   }
 
-  async function handleSendMessage(): Promise<void> {
+  // async function handleAddMessageCount(username: string): Promise<void> {
+  //   const usuario = usuariosConnectados.find((u) => u.username === username);
+  //   if (usuario) {
+  //     const updatedUsuario: Usuario = {
+  //       ...usuario,
+  //       mensages: usuario.mensages + 1,
+  //     };
+
+  //     setUsuariosConnectados((prev) =>
+  //       prev.map((u) => (u.username === username ? updatedUsuario : u))
+  //     );
+  //   }
+  // }
+
+  async function handleSendMessage(username: string): Promise<void> {
     if (connection && inputText.trim() !== "") {
       try {
         await connection.invoke("SendMessage", inputText);
+        //await handleAddMessageCount(username);
         setInputText("");
       } catch (err) {
         alert("Erro ao enviar mensagem. Tente novamente.");
@@ -105,7 +138,7 @@ export default function Chats() {
   }
 
   function removeUserFromList(user: string) {
-    setUsuariosConnectados((prev) => prev.filter((u) => u !== user));
+    setUsuariosConnectados((prev) => prev.filter((x) => x.username !== user));
   }
 
   return (
@@ -129,8 +162,21 @@ export default function Chats() {
               <p>Most active users in the chat</p>
             </div>
             <div className={styles.topSenders}>
-              <div className={styles.topSendersListProfile}></div>
-              {/* Você pode adicionar lógica para contar mensagens por usuário */}
+              <div className={styles.topSendersListProfile}>
+                {usuariosConnectados
+                  .toSorted((a, b) => b.mensages - a.mensages)
+                  .slice(0, 5)
+                  .map((usuario, index) => (
+                    <div key={index++} className={styles.topSender}>
+                      <p className={styles.topSenderUsername}>
+                        {usuario.username}
+                      </p>
+                      <p className={styles.topSenderMensages}>
+                        Mensagens: {usuario.mensages}
+                      </p>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
           <div className={styles.middleBar}>
@@ -165,7 +211,7 @@ export default function Chats() {
               <button
                 className={styles.sendButton}
                 type="button"
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage(username)}
               >
                 ENVIAR
               </button>
@@ -174,8 +220,10 @@ export default function Chats() {
           <div className={styles.rightBar}>
             <p className={styles.rightBarTitle}>Online Users</p>
             <div className={styles.onlineUsers}>
-              {usuariosConnectados.map((usuario) => (
-                <p key={usuario} className={styles.onlineUser}>{usuario}</p>
+              {usuariosConnectados.map((usuario, index) => (
+                <p key={index++} className={styles.onlineUser}>
+                  {usuario.username}
+                </p>
               ))}
             </div>
           </div>
