@@ -27,15 +27,5 @@ namespace worldChat.Service.RedisServices
         {
             await _database.KeyDeleteAsync("usuariosOnline");
         }
-
-        public async Task IncrementarContadorMensagem(string userId)
-        {
-            await _database.StringIncrementAsync($"contadorMensagens:{userId}");
-        }
-
-        public async Task<long> ObterContadorMensagens(string userId)
-        {
-            return (long)(await _database.StringGetAsync($"contadorMensagens:{userId}"));
-        }
     }
 }
