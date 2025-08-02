@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import createSignalRConnection from "@/lib/SignalrConnection";
 import { HubConnection } from "@microsoft/signalr";
-import { desconectarUsuario } from "@/api/apiCalls";
-import { ChatMessage, Usuario } from "@/types/useStateType";
-import endpoints from "@/api/apiRoutes";
+import { desconectarUsuario, handleListarUsuariosOnline } from "@/api/apiCalls";
+import { ChatMessage } from "@/types/useStateType";
 import styles from "./page.module.css";
 
 export default function Chats() {
@@ -15,17 +14,18 @@ export default function Chats() {
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [inputText, setInputText] = useState<string>("");
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
-  const [usuariosConnectados, setUsuariosConnectados] = useState<Usuario[]>([]);
-  const [connectionId, setConnectionId] = useState<string>("");
+  const [usuariosConnectados, setUsuariosConnectados] = useState<string[]>([]);
 
-  const username: string = localStorage.getItem("username") || "";
-  const token: string = localStorage.getItem("token") || "";
-
-  if (!username || !token) {
-    router.push("/login");
-  }
+  const endOfMessages = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const username: string = sessionStorage.getItem("username") || "";
+    const token: string = sessionStorage.getItem("token") || "";
+
+    if (!username || !token) {
+      router.push("/login");
+    }
+
     const newConnection = createSignalRConnection(
       token,
       (user: string, message: string) => {
@@ -36,21 +36,11 @@ export default function Chats() {
         ]);
       },
       (username: string) => {
-        const novoUsuario: Usuario = {
-          connectionId: connectionId,
-          username,
-          mensages: 0,
-        };
-
-        setUsuariosConnectados((prev) => [...prev, novoUsuario]);
+        setUsuariosConnectados((prev) => [...prev, username]);
       },
       (username: string) => {
         removeUserFromList(username);
       },
-      (connectionId: string) => {
-        setConnectionId(connectionId);
-        console.log("Connection ID received:", connectionId);
-      }
     );
 
     newConnection.start().then(() => {
@@ -60,69 +50,27 @@ export default function Chats() {
     return () => {
       newConnection.stop();
     };
-  }, [connectionId, router, token, username]);
+  }, [router]);
+
+  useEffect(() => {
+    endOfMessages.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatLog]);
 
   useEffect(() => {
     async function fetchUsuarios() {
-      const usuarios = await handleListarUsuariosOnline();
-
-      setUsuariosConnectados((prev) => {
-        const novosUsuarios = usuarios
-          .filter((username) => !prev.some((u) => u.username === username))
-          .map((username) => ({
-            connectionId: connectionId,
-            username,
-            mensages: 0,
-          }));
-
-        return [...prev, ...novosUsuarios];
-      });
+      const usuarios: string[] = await handleListarUsuariosOnline();
+      setUsuariosConnectados(usuarios);
     }
 
     fetchUsuarios();
-  }, [connectionId]);
+  }, []);
 
-  async function handleListarUsuariosOnline(): Promise<string[]> {
-    try {
-      const response = await fetch(endpoints.listarUsuarios, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+  
 
-      if (!response.ok) {
-        throw new Error("Erro ao buscar usuários");
-      }
-
-      const usuarios: string[] = await response.json();
-
-      return usuarios;
-    } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-      return [];
-    }
-  }
-
-  // async function handleAddMessageCount(username: string): Promise<void> {
-  //   const usuario = usuariosConnectados.find((u) => u.username === username);
-  //   if (usuario) {
-  //     const updatedUsuario: Usuario = {
-  //       ...usuario,
-  //       mensages: usuario.mensages + 1,
-  //     };
-
-  //     setUsuariosConnectados((prev) =>
-  //       prev.map((u) => (u.username === username ? updatedUsuario : u))
-  //     );
-  //   }
-  // }
-
-  async function handleSendMessage(username: string): Promise<void> {
+  async function handleSendMessage(): Promise<void> {
     if (connection && inputText.trim() !== "") {
       try {
         await connection.invoke("SendMessage", inputText);
-        //await handleAddMessageCount(username);
         setInputText("");
       } catch (err) {
         alert("Erro ao enviar mensagem. Tente novamente.");
@@ -133,12 +81,12 @@ export default function Chats() {
 
   async function handleSair() {
     connection?.stop();
-    desconectarUsuario(localStorage.getItem("username") || "");
+    desconectarUsuario(sessionStorage.getItem("username") || "");
     router.push("/login");
   }
 
   function removeUserFromList(user: string) {
-    setUsuariosConnectados((prev) => prev.filter((x) => x.username !== user));
+    setUsuariosConnectados((prev) => prev.filter((x) => x !== user));
   }
 
   return (
@@ -156,31 +104,8 @@ export default function Chats() {
           </button>
         </div>
         <main className={styles.main}>
-          <div className={styles.sideLeftBar}>
-            <div className={styles.topSendersContainer}>
-              <p>Top Senders</p>
-              <p>Most active users in the chat</p>
-            </div>
-            <div className={styles.topSenders}>
-              <div className={styles.topSendersListProfile}>
-                {usuariosConnectados
-                  .toSorted((a, b) => b.mensages - a.mensages)
-                  .slice(0, 5)
-                  .map((usuario, index) => (
-                    <div key={index++} className={styles.topSender}>
-                      <p className={styles.topSenderUsername}>
-                        {usuario.username}
-                      </p>
-                      <p className={styles.topSenderMensages}>
-                        Mensagens: {usuario.mensages}
-                      </p>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
           <div className={styles.middleBar}>
-            <p className={styles.middleBarTittle}>Chat Messages</p>
+            <p className={styles.middleBarTittle}>CHAT MESSAGES</p>
             <div className={styles.chatMessages}>
               {chatLog.map((msg, messageId) => (
                 <div
@@ -199,6 +124,7 @@ export default function Chats() {
                   <p>{msg.text}</p>
                 </div>
               ))}
+              <div ref={endOfMessages}></div>
             </div>
             <div className={styles.textInputContainer}>
               <input
@@ -207,22 +133,27 @@ export default function Chats() {
                 className={styles.inputText}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSendMessage();
+                  }
+                }}
               />
               <button
                 className={styles.sendButton}
                 type="button"
-                onClick={() => handleSendMessage(username)}
+                onClick={() => handleSendMessage()}
               >
                 ENVIAR
               </button>
             </div>
           </div>
           <div className={styles.rightBar}>
-            <p className={styles.rightBarTitle}>Online Users</p>
+            <p className={styles.rightBarTitle}>ONLINE USERS</p>
             <div className={styles.onlineUsers}>
               {usuariosConnectados.map((usuario, index) => (
                 <p key={index++} className={styles.onlineUser}>
-                  {usuario.username}
+                  {usuario}
                 </p>
               ))}
             </div>

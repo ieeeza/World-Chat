@@ -6,9 +6,8 @@ export default function createSignalRConnection(
   onReceiveMessage: (user: string, message: string, isMine: boolean) => void,
   onUserConnected: (user: string) => void,
   onUserDisconnected: (user: string) => void,
-  onReceivedConnectionId: (connectionId: string) => void
 ) {
-  const username = localStorage.getItem("username");
+  const username = sessionStorage.getItem("username");
 
   const connection = new signalR.HubConnectionBuilder()
     .withUrl("https://worldchat-backend-latest.onrender.com/chats", {
@@ -21,7 +20,6 @@ export default function createSignalRConnection(
   connection.on("ReceiveMessage", onReceiveMessage);
   connection.on("UserConnected", onUserConnected);
   connection.on("UserDisconnected", onUserDisconnected);
-  connection.on("ReceivedConnectionId", onReceivedConnectionId);
 
   connection.onclose(async () => {
     try {

@@ -9,10 +9,10 @@ export async function desconectarUsuario(username: string): Promise<void> {
     },
   });
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("username");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("username");
   alert("Você foi desconectado do servidor.");
-}
+};
 
 export async function buscarCredencial(
   username: string,
@@ -31,13 +31,32 @@ export async function buscarCredencial(
 
   const data = await response.json();
 
-  localStorage.setItem("token", data.password);
-  localStorage.setItem("username", data.username);
+  sessionStorage.setItem("token", data.password);
+  sessionStorage.setItem("username", data.username);
 
   return {
     username: data.dados.username,
     password: data.dados.password,
     mensagem: data.dados.mensagem,
   };
-}
+};
 
+export async function handleListarUsuariosOnline(): Promise<string[]> {
+  try {
+    const response = await fetch(endpoints.listarUsuarios, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao buscar usuários");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar usuários:", error);
+    return [];
+  }
+};

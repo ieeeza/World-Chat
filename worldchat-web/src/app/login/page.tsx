@@ -53,7 +53,7 @@ export default function Login() {
 
   async function handleLogin(): Promise<void> {
     setStyle({ ...style, isLoading: true });
-    
+
     await handleInputs();
 
     try {
@@ -62,8 +62,8 @@ export default function Login() {
       const isValid = await validateStatusResponse(response);
       if (!isValid) return;
 
-      localStorage.setItem("username", response.username);
-      localStorage.setItem("token", response.password);
+      sessionStorage.setItem("username", response.username);
+      sessionStorage.setItem("token", response.password);
 
       setStyle({ ...style, isLoading: false });
       setError("");
@@ -92,6 +92,11 @@ export default function Login() {
             placeholder="Nome de usuário"
             onChange={(e) => setUsername(e.target.value)}
             onClick={() => setStyle({ ...style, errorUsername: false })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleLogin();
+              }
+            }}
             className={style.errorUsername ? styles.inputError : styles.input}
             required
           />
@@ -100,6 +105,11 @@ export default function Login() {
             placeholder="Senha"
             onChange={(e) => setPassword(e.target.value)}
             onClick={() => setStyle({ ...style, errorPassword: false })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleLogin();
+              }
+            }}
             className={style.errorPassword ? styles.inputError : styles.input}
             required
           />
