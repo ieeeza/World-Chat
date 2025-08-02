@@ -22,7 +22,7 @@ var redisConnectionString = Environment.GetEnvironmentVariable("redisConnectionS
 
 if (string.IsNullOrEmpty(redisConnectionString))
 {
-    throw new InvalidOperationException("Redis connection string is not configured properly.");
+   throw new InvalidOperationException("Redis connection string is not configured properly.");
 }
 
 //var redis = builder.Configuration.GetConnectionString("redis");
@@ -74,8 +74,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
-app.Urls.Add($"http://*:{port}");
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
+//app.Urls.Add($"http://*:{port}");
 
 app.MapControllers();
 app.MapHub<ChatHub>("/chats")

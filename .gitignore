@@ -1,0 +1,7 @@
+worldchat-web/node_modules
+worldchat-web/.next
+worldchat-web/next-env.d.ts
+
+worldchat-server/worldchat/.vs
+worldchat-server/worldchat/bin
+worldchat-server/worldchat/obj

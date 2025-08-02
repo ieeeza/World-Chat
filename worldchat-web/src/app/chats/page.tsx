@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import createSignalRConnection from "@/lib/SignalrConnection";
 import { HubConnection } from "@microsoft/signalr";
-import { desconectarUsuario } from "@/api/apiCalls";
+import { desconectarUsuario, handleListarUsuariosOnline } from "@/api/apiCalls";
 import { ChatMessage } from "@/types/useStateType";
-import endpoints from "@/api/apiRoutes";
 import styles from "./page.module.css";
 
 export default function Chats() {
@@ -17,9 +16,11 @@ export default function Chats() {
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
   const [usuariosConnectados, setUsuariosConnectados] = useState<string[]>([]);
 
+  const endOfMessages = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const username: string = localStorage.getItem("username") || "";
-    const token: string = localStorage.getItem("token") || "";
+    const username: string = sessionStorage.getItem("username") || "";
+    const token: string = sessionStorage.getItem("token") || "";
 
     if (!username || !token) {
       router.push("/login");
@@ -40,9 +41,6 @@ export default function Chats() {
       (username: string) => {
         removeUserFromList(username);
       },
-      (connectionId: string) => {
-        alert(`Você está conectado com o ID: ${connectionId}`);
-      }
     );
 
     newConnection.start().then(() => {
@@ -55,36 +53,19 @@ export default function Chats() {
   }, [router]);
 
   useEffect(() => {
+    endOfMessages.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatLog]);
+
+  useEffect(() => {
     async function fetchUsuarios() {
-      const usuarios = await handleListarUsuariosOnline();
+      const usuarios: string[] = await handleListarUsuariosOnline();
       setUsuariosConnectados(usuarios);
     }
 
     fetchUsuarios();
   }, []);
 
-  async function handleListarUsuariosOnline(): Promise<string[]> {
-    try {
-      const response = await fetch(endpoints.listarUsuarios, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar usuários");
-      }
-
-      const usuarios: string[] = await response.json();
-      console.log("Usuários conectados:", usuarios);
-
-      return usuarios;
-    } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-      return [];
-    }
-  }
+  
 
   async function handleSendMessage(): Promise<void> {
     if (connection && inputText.trim() !== "") {
@@ -100,12 +81,12 @@ export default function Chats() {
 
   async function handleSair() {
     connection?.stop();
-    desconectarUsuario(localStorage.getItem("username") || "");
+    desconectarUsuario(sessionStorage.getItem("username") || "");
     router.push("/login");
   }
 
   function removeUserFromList(user: string) {
-    setUsuariosConnectados((prev) => prev.filter((u) => u !== user));
+    setUsuariosConnectados((prev) => prev.filter((x) => x !== user));
   }
 
   return (
@@ -123,18 +104,8 @@ export default function Chats() {
           </button>
         </div>
         <main className={styles.main}>
-          <div className={styles.sideLeftBar}>
-            <div className={styles.topSendersContainer}>
-              <p>Top Senders</p>
-              <p>Most active users in the chat</p>
-            </div>
-            <div className={styles.topSenders}>
-              <div className={styles.topSendersListProfile}></div>
-              {/* Você pode adicionar lógica para contar mensagens por usuário */}
-            </div>
-          </div>
           <div className={styles.middleBar}>
-            <p className={styles.middleBarTittle}>Chat Messages</p>
+            <p className={styles.middleBarTittle}>CHAT MESSAGES</p>
             <div className={styles.chatMessages}>
               {chatLog.map((msg, messageId) => (
                 <div
@@ -153,6 +124,7 @@ export default function Chats() {
                   <p>{msg.text}</p>
                 </div>
               ))}
+              <div ref={endOfMessages}></div>
             </div>
             <div className={styles.textInputContainer}>
               <input
@@ -161,21 +133,28 @@ export default function Chats() {
                 className={styles.inputText}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSendMessage();
+                  }
+                }}
               />
               <button
                 className={styles.sendButton}
                 type="button"
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage()}
               >
                 ENVIAR
               </button>
             </div>
           </div>
           <div className={styles.rightBar}>
-            <p className={styles.rightBarTitle}>Online Users</p>
+            <p className={styles.rightBarTitle}>ONLINE USERS</p>
             <div className={styles.onlineUsers}>
-              {usuariosConnectados.map((usuario) => (
-                <p key={usuario} className={styles.onlineUser}>{usuario}</p>
+              {usuariosConnectados.map((usuario, index) => (
+                <p key={index++} className={styles.onlineUser}>
+                  {usuario}
+                </p>
               ))}
             </div>
           </div>

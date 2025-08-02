@@ -20,7 +20,6 @@ namespace worldChat.Hubs
                 return;
             }
 
-            await _redisChatService.IncrementarContadorMensagem(username);
             await Clients.All.SendAsync("ReceiveMessage", username, message);
         }
 
@@ -34,10 +33,7 @@ namespace worldChat.Hubs
                 return;
             }
 
-            var connectionId = Context.ConnectionId;
-
             await _redisChatService.AdicionarUsuarioOnline(username);
-            await Clients.Caller.SendAsync("ReceiveConnectionId", connectionId);
             await Clients.All.SendAsync("UserConnected", username);
             await base.OnConnectedAsync();
         }

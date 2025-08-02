@@ -30,13 +30,6 @@ namespace worldChat.Controllers
             return NoContent();
         }
 
-        [HttpGet("contador-mensagens/{userId}")]
-        public async Task<IActionResult> ObterContadorMensagens(string userId)
-        {
-            var contador = await _redisChatService.ObterContadorMensagens(userId);
-            return Ok(contador);
-        }
-
         [HttpPost("deletar-usuarios")]
         public async Task<ActionResult> RemoverTodosUsuariosOnline()
         {
